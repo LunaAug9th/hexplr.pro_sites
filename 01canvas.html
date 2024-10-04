@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Pixel Canvas</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Pixel Canvas</h1>
+    
+    <label for="xResolution">X Resolution: </label>
+    <input type="number" id="xResolution" value="100">
+    <label for="yResolution">Y Resolution: </label>
+    <input type="number" id="yResolution" value="100">
+    <button onclick="generateCanvas()">Generate Canvas</button>
+    <button onclick="saveCanvas()">Save Image</button>
+    
+    <br><br>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        function generateCanvas() {
+            const x = parseInt(document.getElementById('xResolution').value);
+            const y = parseInt(document.getElementById('yResolution').value);
+            
+            const canvas = document.getElementById('canvas');
+            canvas.width = x;
+            canvas.height = y;
+            const ctx = canvas.getContext('2d');
+            
+            for (let i = 0; i < x; i++) {
+                for (let j = 0; j < y; j++) {
+                    const rand = Math.round(Math.random()); // 0 또는 1의 난수 생성
+                    ctx.fillStyle = rand === 0 ? 'black' : 'white'; // 0이면 검은색, 1이면 흰색
+                    ctx.fillRect(i, j, 1, 1); // (i, j)에 1x1 픽셀 칠하기
+                }
+            }
+        }
+
+        function saveCanvas() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'random_canvas.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
