@@ -37,12 +37,19 @@
             const repoOwner = "LunaFlies";
             const repoName = "hexplr.pro_sites";
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const token = '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'; // 여기에 Personal Access Token을 입력하세요.
 
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`
+                    }
+                });
+                
                 if (!response.ok) {
                     throw new Error("Failed to fetch files from GitHub.");
                 }
+                
                 const files = await response.json();
                 
                 // 파일 이름을 기반으로 버튼을 생성
@@ -73,4 +80,3 @@
     </script>
 </body>
 </html>
-
