@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File List from GitHub</title>
     <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #ffffff;
+        }
+
         .file-list {
             list-style: none;
             padding: 0;
@@ -63,7 +73,7 @@
                         button.textContent = file.name;
                         button.onclick = () => {
                             // 파일 이름을 링크에 추가하여 이동
-                            window.location.href = `https://hexplr.pro/${file.name}`;
+                            window.location.href = `https://www.hexplr.pro/${file.name}`;
                         };
 
                         listItem.appendChild(button);
