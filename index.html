@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File List from GitHub</title>
+    <title>File and Folder List from GitHub</title>
     <style>
         body {
             background-color: #ffffff;
@@ -35,20 +35,26 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        .folder {
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h1>Files from GitHub Repository</h1>
+    <h1>Files and Folders from GitHub Repository</h1>
     <ul id="fileList" class="file-list"></ul>
 
     <script>
-        // Function to fetch file list from GitHub repository API
-        async function fetchGitHubFiles() {
-            const repoOwner = "LunaFlies";
-            const repoName = "hexplr.pro_sites";
-            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-            const token = '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'; // Enter Personal Access Token here.
+        const repoOwner = "LunaFlies";
+        const repoName = "hexplr.pro_sites";
+        const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+        const token = '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'; // Replace with your GitHub Personal Access Token.
 
+        // Fetch and display the contents of a folder or root
+        async function fetchGitHubContents(path = '') {
+            const apiUrl = `${baseUrl}${path}`;
             try {
                 const response = await fetch(apiUrl, {
                     headers: {
@@ -57,36 +63,47 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error("Failed to fetch files from GitHub.");
+                    throw new Error("Failed to fetch contents from GitHub.");
                 }
 
-                const files = await response.json();
-
-                // Create buttons for each file
-                const fileListElement = document.getElementById("fileList");
-                files.forEach(file => {
-                    if (file.type === "file") {
-                        const listItem = document.createElement("li");
-                        const button = document.createElement("button");
-
-                        // Set file name as button text
-                        button.textContent = file.name;
-                        button.onclick = () => {
-                            // Navigate to the file link
-                            window.location.href = `https://www.hexplr.pro/${file.name}`;
-                        };
-
-                        listItem.appendChild(button);
-                        fileListElement.appendChild(listItem);
-                    }
-                });
+                const contents = await response.json();
+                displayContents(contents, path);
             } catch (error) {
-                console.error("Error fetching files:", error);
+                console.error("Error fetching contents:", error);
             }
         }
 
-        // Fetch files when the page loads
-        window.onload = fetchGitHubFiles;
+        // Display the contents in the file list
+        function displayContents(contents, currentPath) {
+            const fileListElement = document.getElementById("fileList");
+            fileListElement.innerHTML = ''; // Clear previous content
+
+            contents.forEach(item => {
+                const listItem = document.createElement("li");
+
+                if (item.type === "file") {
+                    const fileButton = document.createElement("button");
+                    fileButton.textContent = item.name;
+                    fileButton.onclick = () => {
+                        window.location.href = `https://www.hexplr.pro/${currentPath}${item.name}`;
+                    };
+                    listItem.appendChild(fileButton);
+                } else if (item.type === "dir") {
+                    const folderSpan = document.createElement("span");
+                    folderSpan.textContent = `📁 ${item.name}`;
+                    folderSpan.className = "folder";
+                    folderSpan.onclick = () => {
+                        fetchGitHubContents(`${currentPath}${item.name}/`);
+                    };
+                    listItem.appendChild(folderSpan);
+                }
+
+                fileListElement.appendChild(listItem);
+            });
+        }
+
+        // Load root contents on page load
+        window.onload = () => fetchGitHubContents();
     </script>
 </body>
 </html>
