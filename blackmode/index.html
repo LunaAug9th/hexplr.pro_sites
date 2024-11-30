@@ -6,13 +6,13 @@
     <title>File List from GitHub</title>
     <style>
         body {
-            background-color: #ffffff;
-            color: #000000;
+            background-color: #121212;
+            color: #ffffff;
             font-family: Arial, sans-serif;
         }
 
         h1 {
-            color: #000000;
+            color: #ffffff;
         }
 
         .file-list {
@@ -42,12 +42,12 @@
     <ul id="fileList" class="file-list"></ul>
 
     <script>
-        // Function to fetch file list from GitHub repository API
+        // GitHub 레포지토리 API에서 파일 목록을 가져오는 함수
         async function fetchGitHubFiles() {
             const repoOwner = "LunaFlies";
             const repoName = "hexplr.pro_sites";
-            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-            const token = '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'; // Enter Personal Access Token here.
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/blackmode//`;
+            const token = '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'; // 여기에 Personal Access Token을 입력하세요.
 
             try {
                 const response = await fetch(apiUrl, {
@@ -55,24 +55,24 @@
                         'Authorization': `token ${token}`
                     }
                 });
-
+                
                 if (!response.ok) {
                     throw new Error("Failed to fetch files from GitHub.");
                 }
-
+                
                 const files = await response.json();
-
-                // Create buttons for each file
+                
+                // 파일 이름을 기반으로 버튼을 생성
                 const fileListElement = document.getElementById("fileList");
                 files.forEach(file => {
                     if (file.type === "file") {
                         const listItem = document.createElement("li");
                         const button = document.createElement("button");
 
-                        // Set file name as button text
+                        // 파일 이름을 버튼 텍스트로 설정
                         button.textContent = file.name;
                         button.onclick = () => {
-                            // Navigate to the file link
+                            // 파일 이름을 링크에 추가하여 이동
                             window.location.href = `https://www.hexplr.pro/${file.name}`;
                         };
 
@@ -85,7 +85,7 @@
             }
         }
 
-        // Fetch files when the page loads
+        // 페이지가 로드되면 파일 목록을 가져옴
         window.onload = fetchGitHubFiles;
     </script>
 </body>

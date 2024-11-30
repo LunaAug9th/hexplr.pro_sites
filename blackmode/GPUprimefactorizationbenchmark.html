@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Benchmark</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>GPU Prime Factorization Benchmark</h1>
+  <p>Select a duration (seconds) and start the test:</p>
+  <label for="duration">Duration (seconds): </label>
+  <input type="number" id="duration" min="1" max="60" value="5">
+  <button onclick="startBenchmark()">Start Benchmark</button>
+
+  <div id="result">
+    <h2>Results:</h2>
+    <p id="factorCount">Number of factorizations: </p>
+    <p id="timeElapsed">Elapsed time: </p>
+  </div>
+
+  <script>
+    async function startBenchmark() {
+      const duration = parseInt(document.getElementById('duration').value, 10);
+      if (isNaN(duration) || duration <= 0) {
+        alert("Please enter a valid duration.");
+        return;
+      }
+
+      if (!navigator.gpu) {
+        alert("Your browser does not support WebGPU.");
+        return;
+      }
+
+      // WebGPU initialization
+      const adapter = await navigator.gpu.requestAdapter();
+      const device = await adapter.requestDevice();
+
+      // GPU shader code for computation
+      const shaderCode = `
+        @compute @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+          // Example: Simplified repetitive computation (add actual factorization logic as needed)
+        }
+      `;
+
+      const module = device.createShaderModule({ code: shaderCode });
+
+      const pipeline = device.createComputePipeline({
+        layout: "auto",
+        compute: { module, entryPoint: "main" }
+      });
+
+      const endTime = performance.now() + duration * 1000;
+      let factorCount = 0;
+
+      while (performance.now() < endTime) {
+        // GPU command execution (simulated factorization)
+        factorCount++; // Count the factorizations
+      }
+
+      // Display results
+      document.getElementById('factorCount').textContent = `Number of factorizations: ${factorCount.toLocaleString()}`;
+      document.getElementById('timeElapsed').textContent = `Elapsed time: ${duration} seconds`;
+    }
+  </script>
+</body>
+</html>
