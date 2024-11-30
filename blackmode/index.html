@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File List from GitHub</title>
+    <title>File and Folder List from GitHub</title>
     <style>
         body {
             background-color: #121212;
@@ -26,67 +26,100 @@
 
         button {
             padding: 10px;
-            background-color: #007BFF;
+            background-color: #1E88E5;
             color: white;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #1565C0;
+        }
+
+        .folder {
+            font-weight: bold;
+            cursor: pointer;
+            color: #FFCA28;
+        }
+
+        .folder:hover {
+            color: #FFA000;
         }
     </style>
 </head>
 <body>
-    <h1>Files from GitHub Repository</h1>
+    <h1>Files and Folders from GitHub Repository</h1>
     <ul id="fileList" class="file-list"></ul>
 
     <script>
-        // GitHub 레포지토리 API에서 파일 목록을 가져오는 함수
-        async function fetchGitHubFiles() {
-            const repoOwner = "LunaFlies";
-            const repoName = "hexplr.pro_sites";
-            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/blackmode//`;
-            const token = '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'; // 여기에 Personal Access Token을 입력하세요.
+        const repoOwner = "LunaFlies";
+        const repoName = "hexplr.pro_sites";
+        const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/blackmode/`;
+        const token = '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'; // Replace with your GitHub Personal Access Token.
 
+        // Fetch and display the contents of a folder or root
+        async function fetchGitHubContents(path = '') {
+            const apiUrl = `${baseUrl}${path}`;
             try {
                 const response = await fetch(apiUrl, {
                     headers: {
                         'Authorization': `token ${token}`
                     }
                 });
-                
+
                 if (!response.ok) {
-                    throw new Error("Failed to fetch files from GitHub.");
+                    throw new Error("Failed to fetch contents from GitHub.");
                 }
-                
-                const files = await response.json();
-                
-                // 파일 이름을 기반으로 버튼을 생성
-                const fileListElement = document.getElementById("fileList");
-                files.forEach(file => {
-                    if (file.type === "file") {
-                        const listItem = document.createElement("li");
-                        const button = document.createElement("button");
 
-                        // 파일 이름을 버튼 텍스트로 설정
-                        button.textContent = file.name;
-                        button.onclick = () => {
-                            // 파일 이름을 링크에 추가하여 이동
-                            window.location.href = `https://www.hexplr.pro/blackmode/${file.name}`;
-                        };
-
-                        listItem.appendChild(button);
-                        fileListElement.appendChild(listItem);
-                    }
-                });
+                const contents = await response.json();
+                displayContents(contents, path);
             } catch (error) {
-                console.error("Error fetching files:", error);
+                console.error("Error fetching contents:", error);
             }
         }
 
-        // 페이지가 로드되면 파일 목록을 가져옴
-        window.onload = fetchGitHubFiles;
+        // Display the contents in the file list
+        function displayContents(contents, currentPath) {
+            const fileListElement = document.getElementById("fileList");
+            fileListElement.innerHTML = ''; // Clear previous content
+
+            contents.forEach(item => {
+                const listItem = document.createElement("li");
+
+                if (item.type === "file") {
+                    const fileButton = document.createElement("button");
+                    fileButton.textContent = item.name;
+                    fileButton.onclick = () => {
+                        window.location.href = `https://www.hexplr.pro/blackmode/${currentPath}${item.name}`;
+                    };
+                    listItem.appendChild(fileButton);
+                } else if (item.type === "dir") {
+                    const folderSpan = document.createElement("span");
+                    folderSpan.textContent = `📁 ${item.name}`;
+                    folderSpan.className = "folder";
+                    folderSpan.onclick = () => {
+                        // Update browser URL with folder name
+                        const newPath = `${currentPath}${item.name}/`;
+                        window.location.href = `/${newPath}`;
+                    };
+                    listItem.appendChild(folderSpan);
+                }
+
+                fileListElement.appendChild(listItem);
+            });
+        }
+
+        // Load the correct folder based on the current URL path
+        function getPathFromUrl() {
+            const path = window.location.pathname;
+            return path.startsWith('/') ? path.substring(1) : path;
+        }
+
+        // Load contents on page load based on URL
+        window.onload = () => {
+            const path = getPathFromUrl();
+            fetchGitHubContents(path);
+        };
     </script>
 </body>
 </html>
