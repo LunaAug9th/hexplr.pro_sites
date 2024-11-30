@@ -93,7 +93,9 @@
                     folderSpan.textContent = `📁 ${item.name}`;
                     folderSpan.className = "folder";
                     folderSpan.onclick = () => {
-                        fetchGitHubContents(`${currentPath}${item.name}/`);
+                        // Update browser URL with folder name
+                        const newPath = `${currentPath}${item.name}/`;
+                        window.location.href = `/${newPath}`;
                     };
                     listItem.appendChild(folderSpan);
                 }
@@ -102,8 +104,17 @@
             });
         }
 
-        // Load root contents on page load
-        window.onload = () => fetchGitHubContents();
+        // Load the correct folder based on the current URL path
+        function getPathFromUrl() {
+            const path = window.location.pathname;
+            return path.startsWith('/') ? path.substring(1) : path;
+        }
+
+        // Load contents on page load based on URL
+        window.onload = () => {
+            const path = getPathFromUrl();
+            fetchGitHubContents(path);
+        };
     </script>
 </body>
 </html>
