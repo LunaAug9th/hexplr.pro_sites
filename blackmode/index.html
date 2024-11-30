@@ -48,13 +48,14 @@
     </style>
 </head>
 <body>
-    <h1>Files and Folders from GitHub Repository</h1>
+    <h1>Files and Folders from GitHub Repository (blackmode)</h1>
     <ul id="fileList" class="file-list"></ul>
 
     <script>
         const repoOwner = "LunaFlies";
         const repoName = "hexplr.pro_sites";
-        const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/blackmode/`;
+        const baseFolder = "blackmode"; // Specify the base folder
+        const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${baseFolder}/`;
         const token = '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'; // Replace with your GitHub Personal Access Token.
 
         // Fetch and display the contents of a folder or root
@@ -90,7 +91,7 @@
                     const fileButton = document.createElement("button");
                     fileButton.textContent = item.name;
                     fileButton.onclick = () => {
-                        window.location.href = `https://www.hexplr.pro/blackmode/${currentPath}${item.name}`;
+                        window.location.href = `https://www.hexplr.pro/${baseFolder}/${currentPath}${item.name}`;
                     };
                     listItem.appendChild(fileButton);
                 } else if (item.type === "dir") {
@@ -98,9 +99,8 @@
                     folderSpan.textContent = `📁 ${item.name}`;
                     folderSpan.className = "folder";
                     folderSpan.onclick = () => {
-                        // Update browser URL with folder name
                         const newPath = `${currentPath}${item.name}/`;
-                        window.location.href = `/${newPath}`;
+                        fetchGitHubContents(newPath);
                     };
                     listItem.appendChild(folderSpan);
                 }
@@ -109,16 +109,9 @@
             });
         }
 
-        // Load the correct folder based on the current URL path
-        function getPathFromUrl() {
-            const path = window.location.pathname;
-            return path.startsWith('/') ? path.substring(1) : path;
-        }
-
-        // Load contents on page load based on URL
+        // Load contents on page load
         window.onload = () => {
-            const path = getPathFromUrl();
-            fetchGitHubContents(path);
+            fetchGitHubContents('');
         };
     </script>
 </body>
