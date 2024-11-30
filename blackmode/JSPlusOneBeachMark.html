@@ -3,35 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Benchmark Script</title>
+  <title>CPU Benchmark</title>
   <style>
     body {
+      background-color: #121212;
+      color: #ffffff;
       font-family: Arial, sans-serif;
       margin: 20px;
     }
     #result {
       margin-top: 20px;
     }
+    input, button {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #333333;
+      padding: 5px 10px;
+    }
+    button:hover {
+      background-color: #333333;
+    }
+    h1, h2 {
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
-  <h1>JavaScript Benchmark Test</h1>
-  <p>시간 (초)를 선택하고 테스트를 실행하세요:</p>
+  <h1>JavaScript Benchmark Test (Dark Mode)</h1>
+  <p>Select a duration (seconds) and start the test:</p>
   <label for="duration">Duration (seconds): </label>
   <input type="number" id="duration" min="1" max="60" value="5">
   <button onclick="startBenchmark()">Start Benchmark</button>
 
   <div id="result">
-    <h2>결과:</h2>
-    <p id="count">계산 횟수: </p>
-    <p id="timeElapsed">실제 소요 시간: </p>
+    <h2>Results:</h2>
+    <p id="count">Number of iterations: </p>
+    <p id="timeElapsed">Elapsed time: </p>
   </div>
 
   <script>
     function startBenchmark() {
       const duration = parseInt(document.getElementById('duration').value, 10);
       if (isNaN(duration) || duration <= 0) {
-        alert("유효한 시간을 입력하세요.");
+        alert("Please enter a valid duration.");
         return;
       }
 
@@ -42,10 +56,8 @@
         count += 1;
       }
 
-      // 결과 표시
-      const timeElapsed = duration; // 명시된 시간
-      document.getElementById('count').textContent = `계산 횟수: ${count.toLocaleString()}`;
-      document.getElementById('timeElapsed').textContent = `실제 소요 시간: ${timeElapsed} 초`;
+      document.getElementById('count').textContent = `Number of iterations: ${count.toLocaleString()}`;
+      document.getElementById('timeElapsed').textContent = `Elapsed time: ${duration} seconds`;
     }
   </script>
 </body>
