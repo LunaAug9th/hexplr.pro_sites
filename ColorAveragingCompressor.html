@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Averaging Compressor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff; /* White background */
+      color: #000000; /* Black text */
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input, select, button {
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+    }
+
+    input[type="file"], select {
+      background-color: #f9f9f9; /* Light input background */
+      color: #000000; /* Dark text */
+    }
+
+    button {
+      background-color: #007bff; /* Button color */
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3; /* Hover effect */
+    }
+
+    canvas {
+      margin-top: 20px;
+      border: 1px solid #000000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Color Averaging Compressor</h1>
+  <input type="file" id="fileInput" accept="image/*">
+  <label for="downscaleSelect">Resolution Downscale:</label>
+  <select id="downscaleSelect">
+    <option value="1">Original</option>
+    <option value="2">2x Down</option>
+    <option value="4">4x Down</option>
+    <option value="8">8x Down</option>
+  </select>
+  <label for="formatSelect">Format:</label>
+  <select id="formatSelect">
+    <option value="png">PNG</option>
+    <option value="bmp">BMP</option>
+  </select>
+  <button id="downloadBtn" style="display: none;">Download</button>
+  <br><br>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const downscaleSelect = document.getElementById('downscaleSelect');
+    const formatSelect = document.getElementById('formatSelect');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        processImage();
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    function processImage() {
+      const scaleFactor = parseInt(downscaleSelect.value, 10);
+      const originalWidth = canvas.width;
+      const originalHeight = canvas.height;
+
+      const newWidth = Math.floor(originalWidth / scaleFactor);
+      const newHeight = Math.floor(originalHeight / scaleFactor);
+
+      // Create a scaled-down canvas
+      const scaledCanvas = document.createElement('canvas');
+      const scaledCtx = scaledCanvas.getContext('2d');
+      scaledCanvas.width = newWidth;
+      scaledCanvas.height = newHeight;
+
+      scaledCtx.drawImage(canvas, 0, 0, newWidth, newHeight);
+
+      // Resize the main canvas
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      ctx.drawImage(scaledCanvas, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, newWidth, newHeight);
+      const { width, height, data } = imageData;
+
+      for (let y = 0; y < height; y += 2) {
+        for (let x = 0; x < width; x += 2) {
+          let r = 0, g = 0, b = 0;
+
+          for (let dy = 0; dy < 2; dy++) {
+            for (let dx = 0; dx < 2; dx++) {
+              const pxIndex = ((y + dy) * width + (x + dx)) * 4;
+              r += data[pxIndex] || 0;
+              g += data[pxIndex + 1] || 0;
+              b += data[pxIndex + 2] || 0;
+            }
+          }
+
+          const avgR = Math.floor(r / 4);
+          const avgG = Math.floor(g / 4);
+          const avgB = Math.floor(b / 4);
+
+          for (let dy = 0; dy < 2; dy++) {
+            for (let dx = 0; dx < 2; dx++) {
+              const pxIndex = ((y + dy) * width + (x + dx)) * 4;
+              data[pxIndex] = avgR;
+              data[pxIndex + 1] = avgG;
+              data[pxIndex + 2] = avgB;
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      downloadBtn.style.display = 'block';
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      const format = formatSelect.value;
+      const mimeType = format === 'png' ? 'image/png' : 'image/bmp';
+      const link = document.createElement('a');
+      link.download = `processed_image.${format}`;
+      link.href = canvas.toDataURL(mimeType);
+      link.click();
+    });
+  </script>
+</body>
+</html>
