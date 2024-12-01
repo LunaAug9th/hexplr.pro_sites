@@ -91,7 +91,7 @@
                     const fileButton = document.createElement("button");
                     fileButton.textContent = item.name;
                     fileButton.onclick = () => {
-                        window.location.href = `https://www.hexplr.pro/${baseFolder}/${currentPath}${item.name}`;
+                        window.location.href = `https://hexplr.pro/${baseFolder}/${currentPath}${item.name}`;
                     };
                     listItem.appendChild(fileButton);
                 } else if (item.type === "dir") {
