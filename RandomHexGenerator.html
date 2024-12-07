@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random HEX Style Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #hexValue {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 20px 0;
+      color: black; /* Default color */
+      word-wrap: break-word;
+      max-width: 100%;
+      text-align: center; /* Center text */
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button {
+      cursor: pointer;
+    }
+    #hexValue {
+      display: inline-block;
+      word-wrap: break-word;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Random HEX Style Generator</h1>
+  <label for="charCount">Number of Characters: </label>
+  <input id="charCount" type="number" min="1" max="64" value="6" />
+  <button id="generateBtn">Generate</button>
+  <br />
+  <label for="colorToggleCheckbox">
+    <input id="colorToggleCheckbox" type="checkbox" checked />
+    Apply Color
+  </label>
+  <br />
+  <label for="caseToggleCheckbox">
+    <input id="caseToggleCheckbox" type="checkbox" checked />
+    Uppercase
+  </label>
+  <div id="hexValue">FFFFFF</div>
+
+  <script>
+    // Function to generate random HEX style string
+    function generateRandomHexStyle(length, isUpperCase) {
+      const chars = '0123456789ABCDEF';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return isUpperCase ? result.toUpperCase() : result.toLowerCase();
+    }
+
+    // Element references
+    const generateBtn = document.getElementById('generateBtn');
+    const hexValue = document.getElementById('hexValue');
+    const charCountInput = document.getElementById('charCount');
+    const colorToggleCheckbox = document.getElementById('colorToggleCheckbox');
+    const caseToggleCheckbox = document.getElementById('caseToggleCheckbox');
+
+    let currentHex = ''; // Store the current generated color value
+
+    // Button click event
+    generateBtn.addEventListener('click', () => {
+      const charCount = parseInt(charCountInput.value, 10) || 6; // Default value is 6
+      const isUpperCase = caseToggleCheckbox.checked;
+      currentHex = generateRandomHexStyle(charCount, isUpperCase); // Generate a new random HEX
+      hexValue.textContent = currentHex;
+
+      // Update text color based on color toggle checkbox
+      if (colorToggleCheckbox.checked) {
+        hexValue.style.color = `#${currentHex}`;
+      } else {
+        hexValue.style.color = 'black';
+      }
+    });
+
+    // Checkbox change event (color toggle)
+    colorToggleCheckbox.addEventListener('change', () => {
+      if (colorToggleCheckbox.checked) {
+        hexValue.style.color = `#${currentHex}`; // Apply random color
+      } else {
+        hexValue.style.color = 'black'; // Default color
+      }
+    });
+
+    // Checkbox change event (case toggle)
+    caseToggleCheckbox.addEventListener('change', () => {
+      const isUpperCase = caseToggleCheckbox.checked;
+      currentHex = generateRandomHexStyle(parseInt(charCountInput.value, 10) || 6, isUpperCase);
+      hexValue.textContent = currentHex;
+    });
+  </script>
+</body>
+</html>
