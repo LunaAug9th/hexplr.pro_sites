@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop-up Fun</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        #welcomeText {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        #popupButton {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #popupButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="https://cdn.pixabay.com/photo/2024/12/08/17/19/17-19-04-660_1280.png" alt="Image" width="300">
+    <div id="welcomeText">↓↓ Welcome, press the button lol ↓↓</div>
+    <button id="popupButton">Click Here</button>
+
+    <script>
+        document.getElementById("popupButton").addEventListener("click", function() {
+            const numPopups = 10; // Number of popups
+            const popups = []; // Store popup references
+
+            // Open 10 popups with random initial size
+            for (let i = 0; i < numPopups; i++) {
+                const x = Math.floor(Math.random() * window.screen.availWidth);
+                const y = Math.floor(Math.random() * window.screen.availHeight);
+                const width = Math.floor(Math.random() * 400) + 200; // Random width between 200 and 600
+                const height = Math.floor(Math.random() * 300) + 150; // Random height between 150 and 450
+
+                const popup = window.open(
+                    "",
+                    `popup${i}`,
+                    `width=${width},height=${height},left=${x},top=${y},scrollbars=no,resizable=no`
+                );
+
+                if (popup) {
+                    popup.document.write(`
+                        <html>
+                            <head><title>Popup ${i + 1}</title></head>
+                            <body>
+                                <div style="text-align: center; font-size: 18px; margin-top: 50px;">Popup ${i + 1}</div>
+                                <button onclick="window.close()">Close Popup</button>
+                            </body>
+                        </html>
+                    `);
+                    popups.push(popup);
+                }
+            }
+
+            // Move popups to random positions and sizes every 100ms
+            setInterval(() => {
+                popups.forEach(popup => {
+                    if (popup && !popup.closed) {
+                        const x = Math.floor(Math.random() * window.screen.availWidth);
+                        const y = Math.floor(Math.random() * window.screen.availHeight);
+                        const width = Math.floor(Math.random() * 400) + 200; // Random width
+                        const height = Math.floor(Math.random() * 300) + 150; // Random height
+                        popup.resizeTo(width, height);
+                        popup.moveTo(x, y);
+                    }
+                });
+            }, 100);
+
+            // Detect "s, a, m, u, e, l" key sequence to close all popups
+            const keySequence = ['s', 'a', 'm', 'u', 'e', 'l'];
+            let currentIndex = 0;
+
+            window.addEventListener("keydown", event => {
+                if (event.key === keySequence[currentIndex]) {
+                    currentIndex++;
+                    if (currentIndex === keySequence.length) {
+                        popups.forEach(popup => {
+                            if (popup && !popup.closed) {
+                                popup.close();
+                            }
+                        });
+                        alert("All popups have been closed!");
+                        currentIndex = 0; // Reset sequence
+                    }
+                } else {
+                    currentIndex = 0; // Reset if incorrect key
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
