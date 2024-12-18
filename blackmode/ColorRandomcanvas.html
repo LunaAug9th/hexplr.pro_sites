@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Pixel Canvas</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        label {
+            color: #ffffff;
+        }
+        canvas {
+            border: 1px solid #ffffff;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        select, input {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Pixel Canvas</h1>
+
+    <label for="xResolution">X Resolution: </label>
+    <input type="number" id="xResolution" value="100">
+    <label for="yResolution">Y Resolution: </label>
+    <input type="number" id="yResolution" value="100">
+
+    <label for="mode">Mode: </label>
+    <select id="mode">
+        <option value="color3">Color3</option>
+        <option value="hex">HEX</option>
+    </select>
+
+    <button onclick="generateCanvas()">Generate Canvas</button>
+    <button onclick="saveCanvas()">Save Image</button>
+
+    <br><br>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        function generateCanvas() {
+            const x = parseInt(document.getElementById('xResolution').value);
+            const y = parseInt(document.getElementById('yResolution').value);
+            const mode = document.getElementById('mode').value;
+
+            const canvas = document.getElementById('canvas');
+            canvas.width = x;
+            canvas.height = y;
+            const ctx = canvas.getContext('2d');
+
+            for (let i = 0; i < x; i++) {
+                for (let j = 0; j < y; j++) {
+                    let color;
+                    if (mode === 'color3') {
+                        const r = Math.floor(Math.random() * 256); // 0~255
+                        const g = Math.floor(Math.random() * 256); // 0~255
+                        const b = Math.floor(Math.random() * 256); // 0~255
+                        color = `rgb(${r},${g},${b})`;
+                    } else if (mode === 'hex') {
+                        const hex = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+                        color = `#${hex}`;
+                    }
+                    ctx.fillStyle = color;
+                    ctx.fillRect(i, j, 1, 1); // Draw 1x1 pixel
+                }
+            }
+        }
+
+        function saveCanvas() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'random_canvas.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
