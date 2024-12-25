@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Pixel Canvas - Video Mode (White Version)</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        label {
+            color: #000000;
+        }
+        canvas {
+            border: 1px solid #000000;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Pixel Canvas - Video Mode (White Version)</h1>
+
+    <label for="xResolution">X Resolution: </label>
+    <input type="number" id="xResolution" value="100">
+    <label for="yResolution">Y Resolution: </label>
+    <input type="number" id="yResolution" value="100">
+
+    <br><br>
+    <label for="frameRate">Frame Rate: </label>
+    <input type="number" id="frameRate" value="30">
+    <label for="duration">Duration (seconds): </label>
+    <input type="number" id="duration" value="5">
+
+    <br><br>
+    <label for="colorMode">Color Mode: </label>
+    <select id="colorMode">
+        <option value="color3">Color3 (R, G, B)</option>
+        <option value="hex">HEX</option>
+    </select>
+
+    <br><br>
+    <label for="processingMode">Processing Mode: </label>
+    <select id="processingMode">
+        <option value="cpu">CPU</option>
+        <option value="gpu">GPU</option>
+    </select>
+
+    <br><br>
+    <button onclick="generateVideo()">Generate Video</button>
+    <button id="downloadButton" style="display:none;" onclick="downloadVideo()">Download Video</button>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        let videoBlob = null;
+
+        function generateFrame(ctx, x, y, colorMode) {
+            for (let i = 0; i < x; i++) {
+                for (let j = 0; j < y; j++) {
+                    if (colorMode === 'color3') {
+                        const r = Math.floor(Math.random() * 256);
+                        const g = Math.floor(Math.random() * 256);
+                        const b = Math.floor(Math.random() * 256);
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    } else if (colorMode === 'hex') {
+                        const hex = `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}`;
+                        ctx.fillStyle = hex;
+                    }
+                    ctx.fillRect(i, j, 1, 1);
+                }
+            }
+        }
+
+        async function generateVideo() {
+            const x = parseInt(document.getElementById('xResolution').value);
+            const y = parseInt(document.getElementById('yResolution').value);
+            const frameRate = parseInt(document.getElementById('frameRate').value);
+            const duration = parseInt(document.getElementById('duration').value);
+            const colorMode = document.getElementById('colorMode').value;
+            const processingMode = document.getElementById('processingMode').value;
+
+            const canvas = document.getElementById('canvas');
+            canvas.width = x;
+            canvas.height = y;
+            const ctx = canvas.getContext('2d');
+
+            const stream = canvas.captureStream(frameRate);
+            const mediaRecorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                videoBlob = new Blob(chunks, { type: 'video/webm' });
+                document.getElementById('downloadButton').style.display = 'inline-block';
+            };
+
+            mediaRecorder.start();
+
+            let frameCount = 0;
+            const totalFrames = frameRate * duration;
+
+            function renderFrame() {
+                if (frameCount >= totalFrames) {
+                    mediaRecorder.stop();
+                    return;
+                }
+
+                generateFrame(ctx, x, y, colorMode);
+                frameCount++;
+
+                if (processingMode === 'cpu') {
+                    setTimeout(renderFrame, 1000 / frameRate);
+                } else {
+                    requestAnimationFrame(renderFrame);
+                }
+            }
+
+            renderFrame();
+        }
+
+        function downloadVideo() {
+            if (videoBlob) {
+                const url = URL.createObjectURL(videoBlob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'random_video.webm';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+        }
+    </script>
+</body>
+</html>
