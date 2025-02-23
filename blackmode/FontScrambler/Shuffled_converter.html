@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Scrambler</title>
+</head>
+<body>
+    <h1>Text Scrambler</h1>
+    
+    <label for="inputText">Input Text:</label>
+    <textarea id="inputText" rows="4" cols="50"></textarea><br><br>
+    
+    <label for="jsonFile">Upload JSON File:</label>
+    <input type="file" id="jsonFile" accept=".json"><br><br>
+
+    <button onclick="scrambleText()">Scramble</button>
+
+    <h2>Scrambled Text:</h2>
+    <textarea id="outputText" rows="4" cols="50" readonly></textarea>
+
+    <script>
+        let scrambleTable = {};
+
+        // JSON 파일을 읽고 scrambleTable을 설정하는 함수
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    scrambleTable = JSON.parse(e.target.result);
+                } catch (error) {
+                    alert("Invalid JSON file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 텍스트를 변환하는 함수
+        function scrambleText() {
+            const inputText = document.getElementById("inputText").value;
+            let scrambledText = "";
+            
+            for (let i = 0; i < inputText.length; i++) {
+                const char = inputText[i];
+                scrambledText += scrambleTable.chars[char] || char; // 문자 매칭 안 되면 원래 문자 그대로
+            }
+
+            document.getElementById("outputText").value = scrambledText;
+        }
+
+        document.getElementById("jsonFile").addEventListener("change", handleFileSelect);
+    </script>
+</body>
+</html>

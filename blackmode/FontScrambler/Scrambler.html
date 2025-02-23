@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang=en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FontScrambler</title>
+</head>
+<body>
+    <button id="shuffleBtn">JSON download</button>
+    <script>
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        document.getElementById("shuffleBtn").addEventListener("click", function() {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}\\|;:'\",.<>/?".split("");
+            const shuffledChars = [...chars];
+            shuffleArray(shuffledChars);
+            
+            const scrambleTable = { chars: {} };
+            chars.forEach((char, index) => {
+                scrambleTable.chars[char] = shuffledChars[index];
+            });
+            
+            const jsonString = JSON.stringify(scrambleTable, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "FontScrambler_Shuffled.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+</body>
+</html>
