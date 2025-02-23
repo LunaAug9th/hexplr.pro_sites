@@ -40,6 +40,11 @@
             font-weight: bold;
             cursor: pointer;
         }
+        
+        .gray-text {
+            color: gray;
+            font-size: small;
+        }
     </style>
 </head>
 <body>
@@ -50,17 +55,12 @@
         const repoOwner = "LunaFlies";
         const repoName = "hexplr.pro_sites";
         const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-        const token = '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'; // Replace with your GitHub Personal Access Token.
 
         // Fetch and display the contents of a folder or root
         async function fetchGitHubContents(path = '') {
             const apiUrl = `${baseUrl}${path}`;
             try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                });
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     throw new Error("Failed to fetch contents from GitHub.");
@@ -116,5 +116,7 @@
             fetchGitHubContents(path);
         };
     </script>
+    <p class="gray-text">Page codes in <a href="https://github.com/LunaAug9th/hexplr.pro_sites">https://github.com/LunaAug9th/hexplr.pro_sites</a><br>
+        -Host by Cloudflare Pages</p>
 </body>
 </html>

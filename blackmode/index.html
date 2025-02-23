@@ -56,17 +56,12 @@
         const repoName = "hexplr.pro_sites";
         const baseFolder = "blackmode"; // Specify the base folder
         const baseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${baseFolder}/`;
-        const token = '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'; // Replace with your GitHub Personal Access Token.
 
         // Fetch and display the contents of a folder or root
         async function fetchGitHubContents(path = '') {
             const apiUrl = `${baseUrl}${path}`;
             try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                });
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     throw new Error("Failed to fetch contents from GitHub.");
