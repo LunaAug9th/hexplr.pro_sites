@@ -1,56 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Scrambler</title>
+    <title>FontScrambler Vector Data Conversion</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
 </head>
 <body>
-    <h1>Text Scrambler</h1>
-    
-    <label for="inputText">Input Text:</label>
-    <textarea id="inputText" rows="4" cols="50"></textarea><br><br>
-    
-    <label for="jsonFile">Upload JSON File:</label>
-    <input type="file" id="jsonFile" accept=".json"><br><br>
-
-    <button onclick="scrambleText()">Scramble</button>
-
-    <h2>Scrambled Text:</h2>
-    <textarea id="outputText" rows="4" cols="50" readonly></textarea>
-
+    <input type="file" id="scrambleTableFile" accept="application/json">
+    <input type="file" id="fontFile" accept=".otf,.ttf">
+    <button id="scrambleBtn">Convert Font Data</button>
     <script>
-        let scrambleTable = {};
-
-        // JSON 파일을 읽고 scrambleTable을 설정하는 함수
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
+        document.getElementById("scrambleBtn").addEventListener("click", function() {
+            const tableFileInput = document.getElementById("scrambleTableFile");
+            const fontFileInput = document.getElementById("fontFile");
             
-            reader.onload = function(e) {
-                try {
-                    scrambleTable = JSON.parse(e.target.result);
-                } catch (error) {
-                    alert("Invalid JSON file.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // 텍스트를 변환하는 함수
-        function scrambleText() {
-            const inputText = document.getElementById("inputText").value;
-            let scrambledText = "";
-            
-            for (let i = 0; i < inputText.length; i++) {
-                const char = inputText[i];
-                scrambledText += scrambleTable.chars[char] || char; // 문자 매칭 안 되면 원래 문자 그대로
+            if (tableFileInput.files.length === 0 || fontFileInput.files.length === 0) {
+                alert("Please select both the scramble table JSON and the font file.");
+                return;
             }
-
-            document.getElementById("outputText").value = scrambledText;
-        }
-
-        document.getElementById("jsonFile").addEventListener("change", handleFileSelect);
+            
+            const tableReader = new FileReader();
+            const fontReader = new FileReader();
+            
+            tableReader.onload = function(event) {
+                const scrambleTable = JSON.parse(event.target.result).chars;
+                
+                fontReader.onload = function(fontEvent) {
+                    const font = opentype.parse(fontEvent.target.result);
+                    const newGlyphs = {};
+                    
+                    font.glyphs.forEach(glyph => {
+                        const unicode = glyph.unicode;
+                        if (unicode && scrambleTable[String.fromCharCode(unicode)]) {
+                            newGlyphs[scrambleTable[String.fromCharCode(unicode)]] = glyph;
+                        } else {
+                            newGlyphs[String.fromCharCode(unicode)] = glyph;
+                        }
+                    });
+                    
+                    const newFont = new opentype.Font({
+                        familyName: font.names.fontFamily.en,
+                        styleName: font.names.fontSubfamily.en,
+                        unitsPerEm: font.unitsPerEm,
+                        ascender: font.ascender,
+                        descender: font.descender,
+                        glyphs: Object.values(newGlyphs)
+                    });
+                    
+                    const arrayBuffer = newFont.toArrayBuffer();
+                    const blob = new Blob([arrayBuffer], { type: "font/otf" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = "Scrambled_Font.otf";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+                fontReader.readAsArrayBuffer(fontFileInput.files[0]);
+            };
+            tableReader.readAsText(tableFileInput.files[0]);
+        });
     </script>
 </body>
 </html>
