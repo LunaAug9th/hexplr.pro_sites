@@ -14,46 +14,63 @@
         document.getElementById("scrambleBtn").addEventListener("click", function() {
             const tableFileInput = document.getElementById("scrambleTableFile");
             const fontFileInput = document.getElementById("fontFile");
-            
+
             if (tableFileInput.files.length === 0 || fontFileInput.files.length === 0) {
                 alert("Please select both the scramble table JSON and the font file.");
                 return;
             }
-            
+
             const tableReader = new FileReader();
             const fontReader = new FileReader();
-            
+
             tableReader.onload = function(event) {
                 const scrambleTable = JSON.parse(event.target.result).chars;
-                
+
                 fontReader.onload = function(fontEvent) {
                     const font = opentype.parse(fontEvent.target.result);
                     const newGlyphs = [];
-                    
+
                     for (let i = 0; i < font.glyphs.length; i++) {
                         const glyph = font.glyphs.get(i);
                         const unicode = glyph.unicode;
+                        let newUnicode = unicode; // 기본값 유지
+
                         if (unicode && scrambleTable[String.fromCharCode(unicode)]) {
-                            newGlyphs.push(new opentype.Glyph({
-                                name: glyph.name,
-                                unicode: scrambleTable[String.fromCharCode(unicode)].charCodeAt(0),
-                                advanceWidth: glyph.advanceWidth,
-                                path: glyph.path
-                            }));
-                        } else {
-                            newGlyphs.push(glyph);
+                            newUnicode = scrambleTable[String.fromCharCode(unicode)].charCodeAt(0);
                         }
+
+                        const newGlyph = new opentype.Glyph({
+                            name: glyph.name,
+                            unicode: newUnicode,
+                            advanceWidth: glyph.advanceWidth,
+                            path: glyph.path,
+                            xMin: glyph.xMin,
+                            xMax: glyph.xMax,
+                            yMin: glyph.yMin,
+                            yMax: glyph.yMax
+                        });
+
+                        newGlyphs.push(newGlyph);
                     }
-                    
+
                     const newFont = new opentype.Font({
-                        familyName: font.names.fontFamily.en,
-                        styleName: font.names.fontSubfamily.en,
+                        familyName: font.names.fontFamily.en || "ScrambledFont",
+                        styleName: font.names.fontSubfamily.en || "Regular",
                         unitsPerEm: font.unitsPerEm,
                         ascender: font.ascender,
                         descender: font.descender,
                         glyphs: newGlyphs
                     });
-                    
+
+                    // 폰트 유효성 검사
+                    try {
+                        newFont.validate();
+                    } catch (error) {
+                        console.error("Font validation failed:", error);
+                        alert("Font validation failed. Check console for details.");
+                        return;
+                    }
+
                     const arrayBuffer = newFont.toArrayBuffer();
                     const blob = new Blob([arrayBuffer], { type: "font/otf" });
                     const a = document.createElement("a");
