@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,16 +28,22 @@
                 
                 fontReader.onload = function(fontEvent) {
                     const font = opentype.parse(fontEvent.target.result);
-                    const newGlyphs = {};
+                    const newGlyphs = [];
                     
-                    font.glyphs.forEach(glyph => {
+                    for (let i = 0; i < font.glyphs.length; i++) {
+                        const glyph = font.glyphs.get(i);
                         const unicode = glyph.unicode;
                         if (unicode && scrambleTable[String.fromCharCode(unicode)]) {
-                            newGlyphs[scrambleTable[String.fromCharCode(unicode)]] = glyph;
+                            newGlyphs.push(new opentype.Glyph({
+                                name: glyph.name,
+                                unicode: scrambleTable[String.fromCharCode(unicode)].charCodeAt(0),
+                                advanceWidth: glyph.advanceWidth,
+                                path: glyph.path
+                            }));
                         } else {
-                            newGlyphs[String.fromCharCode(unicode)] = glyph;
+                            newGlyphs.push(glyph);
                         }
-                    });
+                    }
                     
                     const newFont = new opentype.Font({
                         familyName: font.names.fontFamily.en,
@@ -45,7 +51,7 @@
                         unitsPerEm: font.unitsPerEm,
                         ascender: font.ascender,
                         descender: font.descender,
-                        glyphs: Object.values(newGlyphs)
+                        glyphs: newGlyphs
                     });
                     
                     const arrayBuffer = newFont.toArrayBuffer();
